@@ -1,15 +1,5 @@
-function constructImageURL(photoObj) {
-    return (
-        "https://farm" +
-        photoObj.farm +
-        ".staticflickr.com/" +
-        photoObj.server +
-        "/" +
-        photoObj.id +
-        "_" +
-        photoObj.secret +
-        ".jpg"
-    )
+function constructImageURL({ farm, server, id, secret }) {
+    return `https://farm${farm}.staticflickr.com/${server}/${id}_${secret}.jpg`
 }
 
 export default function getPhotos(
@@ -18,7 +8,7 @@ export default function getPhotos(
     long = "-86.1579024"
 ) {
     const apiKey = "183aac1229d8d18d7dae109e1bdc3383"
-    const perPage = 10
+    const perPage = 100
     const CORSProxy = "https://shrouded-mountain-15003.herokuapp.com/"
     const url = `${CORSProxy}https://flickr.com/services/rest/?api_key=${apiKey}&format=json&nojsoncallback=1&method=flickr.photos.search&safe_search=1&per_page=${perPage}&lat=${lat}&lon=${long}&text=${searchTerm}`
 

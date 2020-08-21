@@ -1,17 +1,61 @@
 import React from "react"
+import _ from "lodash"
 
 import getPhotos from "../services/flickrService"
 
 export default class Gallery extends React.Component {
     constructor(props) {
         super(props)
+
+        this.initialLatitude = "39.76574"
+        this.initialLongitude = "-86.1579024"
+
         this.state = {
+            prevLatitude: null,
+            prevLongitude: null,
+            latitude: this.latitude,
+            longitude: this.longitude,
             photos: [],
         }
     }
 
+    // componentDidUpdate() {
+    //     if (this.state.latitude === this.initialLatitude) return
+    //     if (this.state.latitude === this.prevLatitude) return
+    // }
+
     componentDidMount() {
-        getPhotos("spaghetti").then(photos => this.setState({ photos }))
+        const onSuccess = location => {
+            const { latitude, longitude } = location.coords
+            const andThenPopulateAgain = this.populatePhotosList
+
+            this.setState(
+                currentState => ({
+                    prevLatitude: currentState.latitude,
+                    latitude,
+                    longitude,
+                }),
+                andThenPopulateAgain
+            )
+        }
+
+        const onError = err => console.warn(err.message)
+
+        navigator.geolocation.getCurrentPosition(onSuccess, onError)
+
+        this.populatePhotosList()
+    }
+
+    populatePhotosList = () => {
+        getPhotos(
+            this.props.searchTerm,
+            this.state.latitude,
+            this.state.longitude
+        ).then(photos => this.setState({ photos }))
+    }
+
+    pickRandomPhoto() {
+        return _.sample(this.state.photos)
     }
 
     render() {
@@ -19,11 +63,11 @@ export default class Gallery extends React.Component {
             return <div className="Photo">Loading...</div>
         }
 
-        const firstPhoto = this.state.photos[0]
+        const randomPhoto = this.pickRandomPhoto()
         return (
             <div className="Photo">
-                <h3>{firstPhoto.title}</h3>
-                <img src={firstPhoto.src} alt={firstPhoto.title} />
+                <h3>{randomPhoto.title}</h3>
+                <img src={randomPhoto.src} alt={randomPhoto.title} />
             </div>
         )
     }
